@@ -13,7 +13,7 @@ import com.github.amlcurran.showcaseview.targets.ViewTarget;
 
 import java.util.Stack;
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends AppCompatActivity implements OnShowcaseEventListener, View.OnClickListener {
     private Button oneButton;
     private Button twoButton;
     private TextView twoTextView;
@@ -27,9 +27,11 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
         oneButton = (Button) findViewById(R.id.button);
         twoButton = (Button) findViewById(R.id.button2);
+        twoTextView = (TextView) findViewById(R.id.textView);
 
         views.push(twoButton);
         views.push(twoTextView);
+
         twoTextView = (TextView) findViewById(R.id.textView);
 
         hello = new ShowcaseView.Builder(this)
@@ -38,31 +40,45 @@ public class MainActivity extends AppCompatActivity {
                 .setContentText("This is highlighting the Home button")
                 .hideOnTouchOutside()
                 .build();
-        hello.setOnShowcaseEventListener(new OnShowcaseEventListener() {
-            @Override
-            public void onShowcaseViewHide(ShowcaseView showcaseView) {
-                showcaseView.setShowcase(new ViewTarget(twoButton), true);
-            }
+        hello.setOnShowcaseEventListener(this);
+        hello.overrideButtonClick(this);
 
-            @Override
-            public void onShowcaseViewDidHide(ShowcaseView showcaseView) {
-                hello = new ShowcaseView.Builder(MainActivity.this)
-                        .setTarget(new ViewTarget(views.pop())).withMaterialShowcase().setStyle(R.style.CustomShowcaseTheme2)
-                        .setContentTitle("Hello")
-                        .setContentText("This is highlighting the Home button")
-                        .hideOnTouchOutside()
-                        .build();
-            }
+    }
 
-            @Override
-            public void onShowcaseViewShow(ShowcaseView showcaseView) {
+    @Override
+    public void onShowcaseViewHide(ShowcaseView showcaseView) {
 
-            }
+    }
 
-            @Override
-            public void onShowcaseViewTouchBlocked(MotionEvent motionEvent) {
+    @Override
+    public void onShowcaseViewDidHide(ShowcaseView showcaseView) {
+        if (!views.isEmpty()) {
+            View pop = views.pop();
+            hello = new ShowcaseView.Builder(MainActivity.this)
+                    .setTarget(new ViewTarget(pop)).withMaterialShowcase().setStyle(R.style.CustomShowcaseTheme2)
+                    .setContentTitle("Hello")
+                    .setContentText("This is highlighting the Home button")
+                    .hideOnTouchOutside()
+                    .build();
+            hello.setOnShowcaseEventListener(this);
+            hello.overrideButtonClick(this);
 
-            }
-        });
+        }
+    }
+
+    @Override
+    public void onShowcaseViewShow(ShowcaseView showcaseView) {
+
+    }
+
+    @Override
+    public void onShowcaseViewTouchBlocked(MotionEvent motionEvent) {
+
+    }
+
+    @Override
+    public void onClick(View v) {
+        hello.hide();
+        hello.setOnShowcaseEventListener(null);
     }
 }
